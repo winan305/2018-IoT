@@ -131,6 +131,8 @@ def main() :
     try:
         # Main이 시작됨을 출력한다.
         print("Main Start.")
+        # 반복 간 한줄 띄워 읽기 쉽게 하기위해 삽입한 print문이다.
+        print()
         # 무한 반복한다.
         while True:
             # 거리와 빛의 세기값을 얻어온다.
@@ -148,8 +150,6 @@ def main() :
 
             # 1ms 쉰다.
             time.sleep(1)
-            # 반복 간 한줄 띄워 읽기 쉽게 하기위해 삽입한 print문이다.
-            print()
 
     # 키보드 인터럽트 예외 발생 시 예외처리한다.
     # spi를 닫고 gpio를 클린하고 프로그램을 종료하게 된다.
