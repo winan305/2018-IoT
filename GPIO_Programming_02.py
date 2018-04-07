@@ -131,10 +131,11 @@ def main() :
     try:
         # Main이 시작됨을 출력한다.
         print("Main Start.")
-        # 반복 간 한줄 띄워 읽기 쉽게 하기위해 삽입한 print문이다.
-        print()
+
         # 무한 반복한다.
         while True:
+            # 반복 간 한줄 띄워 읽기 쉽게 하기위해 삽입한 print문이다.
+            print()
             # 거리와 빛의 세기값을 얻어온다.
             distance = getUltraValue()
             light_level = getLightValue()
