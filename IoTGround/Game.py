@@ -28,12 +28,12 @@ class Game:
         컨트롤러 객체 생성해서 컨트롤러 핀 모드 초기화
         그러고나서 게임에 필요한거 초기화하고 run 함수 부르면 될듯
         '''
-        print("Game Class Object init")
+        print("Log : Game Class Object init")
         self.controller = Controller.Controller()
         self.target_number = self.controller.TARGET_NUMBER
 
         # 게임 모드, 참가자, 라운드 횟수, 라운드간 쉬는 시간
-        self.game_mode = game_mode.toLowerCase()
+        self.game_mode = game_mode.lower()
         self.game_participant = game_participant
         self.game_repeat = game_repeat
         self.game_interval = game_interval
@@ -44,7 +44,7 @@ class Game:
         '''
         안드로이드 앱으로부터 요청이 올 때 까지 대기.
         '''
-        print("Call waitRequest()")
+        print("Log : Call wait()")
         pass
 
     def ready(self):
@@ -56,7 +56,7 @@ class Game:
         게임 진행 전 마다 세팅해줘야 그 순간순간 조도값에 맞출 수 있겠지?
         '''
         self.controller.initSensorState()
-        print("Call ready2play()")
+        print("Log : Call ready()")
         pass
 
     def play(self, game_mode):
@@ -66,12 +66,12 @@ class Game:
         아마 멀티 쓰레딩이 필요할 듯 싶은데. 흠..
         고민좀 해봐야할듯
         '''
-        print("Call play()")
+        print("Log : Call play()")
 
-        if game_mode is self.GAME_MODE_SINGLE :
+        if game_mode == self.GAME_MODE_SINGLE :
             self.play_single()
 
-        elif game_mode is self.GAME_MODE_TEAM :
+        elif game_mode == self.GAME_MODE_TEAM :
             self.play_team(self.game_participant)
 
         print("Game Finish!!")
@@ -81,19 +81,20 @@ class Game:
         싱글모드.
         표적지를 한 개만 랜덤하게 세움.
         '''
-        print("Game Mode : Single")
+        print("Log : Game Mode : Single")
         for repeat in range(self.game_repeat):
-            print("Game No :", repeat)
+            print("Log : Game No :", repeat)
             # (target/light_sensor) = (0/0,1) (1/2,3) (2/4,5) (3/6,7)
             # light_sensor = target*2, target*2+1
             target = randrange(self.target_number)
-            light_sensor_head = target*2
-            light_sensor_body = target*2+1
-
+            light_sensor_head = 0 #target*2
+            light_sensor_body = 1 #target*2+1
+            print("Target :", target)
             self.controller.controllTarget(target, self.REQ_TARGET_UP)
             while not (self.controller.getLightSensorState(light_sensor_head)
                        or self.controller.getLightSensorState(light_sensor_body)):
                 continue
+            print("Log : Hit!!")
             self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
 
             time.sleep(self.game_interval)
@@ -104,25 +105,25 @@ class Game:
         표적지를 참여자 수 만큼 랜덤하게 세움
         :param game_participant: 참가자 수
         '''
-        print("Game Mode : Team")
+        print("Log : Game Mode : Team")
         for repeat in range(self.game_repeat):
-            print("Game No :", repeat)
+            print("Log : Game No :", repeat)
             # target = randrange(self.TARGET)
             # (target/light_sensor) = (0/0,1) (1/2,3) (2/4,5) (3/6,7)
             # light_sensor = target*2, target*2+1
 
             # 0,1,2,3 중에 게임 참가자만큼의 개수를 랜덤한 리스트로 반환함. (3명이면 0,2,3 이런식)
-            targets = random.sample(range(self.target_number), game_participant)
+            targets = sample(range(self.target_number), game_participant)
             light_sensor_heads = [target*2 for target in targets]
             light_sensor_bodys = [head+1 for head in light_sensor_heads]
-
+            print("Targets :", targets)
             down_count = game_participant
             for target in targets :
                 self.controller.controllTarget(target, self.REQ_TARGET_UP)
 
             while down_count > 0 :
                 for i in range(game_participant) :
-                    if self.controller.getLightSensorState(light_sensor_heads[i]) or self.controller.getLightSensorState(light_sensor_bodys[i]) :
+                    if self.controller.getLightSensorState(0) or self.controller.getLightSensorState(0) :
                         self.controller.controllTarget(targets[i], self.REQ_TARGET_DOWN)
                         down_count -= 1
 
@@ -136,22 +137,21 @@ class Game:
         게임 끝나면 결과가 저장되어 있겠지?
         그 값들 데이터베이스에 저장하자.
         '''
-        print("Call saveResult()")
-        pass
+        print("Log : Call save()")
 
     def reset(self):
         '''
         게임 진행하면서 저장된 값들이 있을 것임.
         그 값들을 초기화 해서 다음 게임에 지장없게.
         '''
-        print("Call reset()")
-        pass
+        print("Log : Call reset()")
+        self.controller.stop()
 
     def run(self):
         '''
         런~
         '''
-        print("Call run()")
+        print("Log : Call run()")
         self.wait()
         self.ready()
         self.play(self.game_mode)
@@ -159,5 +159,5 @@ class Game:
         self.reset()
         pass
 
-game = Game(game_mode="single", game_participant=1)
+game = Game(game_mode="team", game_participant=2, game_repeat=10)
 game.run()

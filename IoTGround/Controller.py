@@ -7,12 +7,14 @@ class Controller :
     컨트롤러 클래스
     조도센서 8개, 서보모터 4개
     '''
+    
+    INIT_REPEAT = 5
     TARGET_NUMBER = 4
     FLAG_TARGET_UP, FLAG_TARGET_DOWN = 0 , 1
     TARGET_STATE = [False] * TARGET_NUMBER
     TARGET_UP_ANGLE, TARGET_DOWN_ANGLE = 7.5, 12
     # GPIO 5, 6, 13, 19 사용
-    motorPins = [18, 5,6,7]
+    motorPins = [18, 5,6,13]
     pmws = []
 
     LIGHT_SENSOR_NUMBER = 8
@@ -24,16 +26,10 @@ class Controller :
         생성자 함수.
         여기서 핀모드를 설정하든 뭘 하든 하면 되겠지?
         '''
-        print("Controller Class Object init")
+        print("Log : Controller Class Object init")
         # 여기서부터 모터
 
         GPIO.setmode(GPIO.BCM)
-
-        for motorPin in self.motorPins :
-            GPIO.setup(motorPin, GPIO.OUT)
-            p = GPIO.PWM(motorPin, 50)
-            p.start(0)
-            self.pmws.append(p)
 
         # 여기서부터 조도센서 spi모듈 사용을 위해 초기화
         self.spi = spidev.SpiDev()
@@ -86,12 +82,13 @@ class Controller :
         처음 게임이 실행되면 이 함수를 호출함
         조도센서로부터 값을 5회정도 받아서 평균내면 되지 않을까?
         '''
-
+        self.start()
+        
         # 모든 표적지를 세움
         for pmw in self.pmws :
             pmw.ChangeDutyCycle(self.TARGET_UP_ANGLE)
 
-        for _ in range(5) :
+        for _ in range(self.INIT_REPEAT) :
             for light_channel in self.light_channels :
                 self.AVG_LIGHT_VALUE[light_channel] += self.getLigthValue(light_channel)
             time.sleep(0.5)
@@ -103,5 +100,15 @@ class Controller :
         for pmw in self.pmws :
             pmw.ChangeDutyCycle(self.TARGET_DOWN_ANGLE)
 
-        print("Call initSensorState(), result =", self.AVG_LIGHT_VALUE)
+        print("Log : Call initSensorState(), result =", self.AVG_LIGHT_VALUE)
+        
+    def start(self) :
+        for motorPin in self.motorPins :
+            GPIO.setup(motorPin, GPIO.OUT)
+            p = GPIO.PWM(motorPin, 50)
+            p.start(0)
+            self.pmws.append(p)
 
+    def stop(self) :
+        for pmw in self.pmws :
+            pmw.stop()
