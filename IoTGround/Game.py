@@ -1,5 +1,6 @@
-import IoTGround.Controller as Controller
-import random
+import Controller as Controller
+from random import *
+import time
 
 class Game:
     '''
@@ -24,7 +25,6 @@ class Game:
         '''
         print("Game Class Object init")
         self.controller = Controller.Controller()
-        self.controller.initSensorState()
         pass
 
     def waitRequest(self):
@@ -42,6 +42,7 @@ class Game:
         왜 여기서 이 함수를 호출하냐?
         게임 진행 전 마다 세팅해줘야 그 순간순간 조도값에 맞출 수 있겠지?
         '''
+        self.controller.initSensorState()
         print("Call ready2play()")
         pass
 
@@ -53,16 +54,18 @@ class Game:
         고민좀 해봐야할듯
         '''
         print("Call play()")
-        target = random.random(self.NUM_OF_TARGETS)
-        self.controller.controllTarget(target, self.REQ_TARGET_UP)
-
-        # 조도센서의 상태가 True 이면 피격당한것
-        while not self.controller.getLightSensorState(target) :
-            pass
-        self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
-
-        pass
-
+        #light_sensor = randrange(self.NUM_OF_TARGETS)
+        for repeat in range(5) :
+            print("Game No :", repeat)
+            time.sleep(3)
+            light_sensor = 0
+            target = light_sensor//2
+            
+            self.controller.controllTarget(target, self.REQ_TARGET_UP)
+            while not self.controller.getLightSensorState(light_sensor) : continue
+            self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
+        print("Game Finish!!")
+        
     def saveResult(self):
         '''
         게임 끝나면 결과가 저장되어 있겠지?
