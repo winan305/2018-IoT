@@ -1,6 +1,7 @@
 import Controller as Controller
 from random import *
 import time
+import threading
 '''
 IoT Team Project Source Code - Last update : YYYY-MM-DD (comment if need)
 '''
@@ -87,8 +88,8 @@ class Game:
             # (target/light_sensor) = (0/0,1) (1/2,3) (2/4,5) (3/6,7)
             # light_sensor = target*2, target*2+1
             target = randrange(self.target_number)
-            light_sensor_head = 0 #target*2
-            light_sensor_body = 1 #target*2+1
+            light_sensor_head = target*2
+            light_sensor_body = target*2+1
             print("Target :", target)
             self.controller.controllTarget(target, self.REQ_TARGET_UP)
             while not (self.controller.getLightSensorState(light_sensor_head)
@@ -123,7 +124,7 @@ class Game:
 
             while down_count > 0 :
                 for i in range(game_participant) :
-                    if self.controller.getLightSensorState(0) or self.controller.getLightSensorState(0) :
+                    if self.controller.getLightSensorState(0) or self.controller.getLightSensorState(1) :
                         self.controller.controllTarget(targets[i], self.REQ_TARGET_DOWN)
                         down_count -= 1
 
@@ -157,6 +158,11 @@ class Game:
         self.play(self.game_mode)
         self.save()
         self.reset()
+    
+    def clear(self) :
+        '''
+        target clear function
+        '''
         pass
 
 game = Game(game_mode="team", game_participant=2, game_repeat=10)
