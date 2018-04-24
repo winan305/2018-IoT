@@ -1,9 +1,9 @@
 import IoTGround.Game
 '''
-서버 소스 코드
-흐음.
-mqtt를 써야 하는 거 같음.
-사실 얘도 그냥 클라이언트 라고 봐야겠지? 서버는 mqtt 서버니까.
+서버 소스 코드(사실은 MQTT 클라이언트임)
+모바일로부터 발송된 MQTT 메세지를 구독해서 처리함.
+
+서버 객체 생성 -> MQTT 클라이언트 생성 및 연결 -> 요청대기 -> 요청받으면 요청에 따라 처리 -> 다시 요청대기
 
 메세지 프로토콜부터 결정하자.
 안드로이드 앱 to 서버 :
@@ -26,7 +26,24 @@ mqtt를 써야 하는 거 같음.
 '''
 
 class Server :
-    '''
-    뿌애애애애애애앵
-    '''
-    pass
+
+    def __init__(self):
+        pass
+
+    def initMQTT(self):
+        pass
+
+    def wait(self):
+        pass
+
+    def process(self):
+        pass
+
+    def startGame(self):
+        pass
+
+    def sendUserInfo(self):
+        pass
+
+    def sendRanking(self):
+        pass
