@@ -9,13 +9,12 @@ IoT Team Project Source Code - Last update : YYYY-MM-DD (comment if need)
 class Game:
     '''
     게임진행 메인 클래스
-    1. 게임 요청을 받고
-    2. 게임 준비를 하고
-    3. 게임 진행을 하고
-    4. 게임 결과를 저장
-    5. 게임 내용 초기화
+    1. 게임 준비를 하고
+    2. 게임 진행을 하고
+    3. 게임 결과를 저장
+    4. 게임 내용 초기화
     위 과정 반복.
-    waitRequest() -> ready2Play() -> play() -> saveResult() -> reset() -> waitRequest() -> ...
+    ready() -> play() -> save() -> reset() -> ready() -> ...
     위 과정을 run() 에서 실행
     '''
 
@@ -38,15 +37,6 @@ class Game:
         self.game_participant = game_participant
         self.game_repeat = game_repeat
         self.game_interval = game_interval
-
-        pass
-
-    def wait(self):
-        '''
-        안드로이드 앱으로부터 요청이 올 때 까지 대기.
-        '''
-        print("Log : Call wait()")
-        pass
 
     def ready(self):
         '''
@@ -153,7 +143,6 @@ class Game:
         런~
         '''
         print("Log : Call run()")
-        self.wait()
         self.ready()
         self.play(self.game_mode)
         self.save()
@@ -165,5 +154,5 @@ class Game:
         '''
         pass
 
-game = Game(game_mode="team", game_participant=2, game_repeat=10)
-game.run()
+#game = Game(game_mode="team", game_participant=2, game_repeat=10)
+#game.run()

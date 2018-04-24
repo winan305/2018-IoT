@@ -1,9 +1,9 @@
-import IoTGround.Game
+import Game
 '''
 서버 소스 코드(사실은 MQTT 클라이언트임)
 모바일로부터 발송된 MQTT 메세지를 구독해서 처리함.
 
-서버 객체 생성 -> MQTT 클라이언트 생성 및 연결 -> 요청대기 -> 요청받으면 요청에 따라 처리 -> 다시 요청대기
+서버 객체 생성 -> MQTT 클라이언트 생성 및 연결 -> loop_forever -> 요청받으면 요청에 따라 처리 
 
 메세지 프로토콜부터 결정하자.
 안드로이드 앱 to 서버 :
@@ -28,22 +28,18 @@ import IoTGround.Game
 class Server :
 
     def __init__(self):
-        pass
+        print("Server : init Server!")
+  
+    def start_game(self, data):
+        print("Server : start game, Data :",data)
+        game_mode, game_participant = data[0], int(data[1])
+        game = Game.Game(game_mode=game_mode, game_participant=game_participant)
+        game.run()
 
-    def initMQTT(self):
-        pass
+    def send_user_info(self, data):
+        print("Server : send user info, Data :", data)
+        return None
 
-    def wait(self):
-        pass
-
-    def process(self):
-        pass
-
-    def startGame(self):
-        pass
-
-    def sendUserInfo(self):
-        pass
-
-    def sendRanking(self):
-        pass
+    def send_ranking(self, data):
+        print("Server : send_ranking, Data :", data)
+        return None
