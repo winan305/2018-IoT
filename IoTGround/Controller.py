@@ -101,6 +101,7 @@ class Controller :
             pmw.ChangeDutyCycle(self.TARGET_DOWN_ANGLE)
 
         print("Log : Call initSensorState(), result =", self.AVG_LIGHT_VALUE)
+        time.sleep(3)
         
     def start(self) :
         for motorPin in self.motorPins :

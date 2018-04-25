@@ -21,7 +21,8 @@ class Game:
     REQ_TARGET_UP, REQ_TARGET_DOWN = 0, 1
     GAME_MODE_SINGLE = "single"
     GAME_MODE_TEAM = "team"
-
+    GAME_TIME_LIMIT = 3 # 3sec
+    
     def __init__(self, game_mode, game_participant, game_repeat = 10, game_interval = 3):
         '''
         파이에 전원 꽂으면 Main 객체가 생성되도록 하고
@@ -37,7 +38,10 @@ class Game:
         self.game_participant = game_participant
         self.game_repeat = game_repeat
         self.game_interval = game_interval
-
+        
+        self.is_clear = False
+        self.is_time_over = False
+        
     def ready(self):
         '''
         앱으로 부터 게임모드, 인원수 등을 받았겠지
@@ -66,28 +70,57 @@ class Game:
             self.play_team(self.game_participant)
 
         print("Game Finish!!")
-
+    
+    def time_over(self) :
+        if not self.is_clear :
+            self.is_time_over = True
+            
+    def init_state(self) :
+        self.is_time_over = False
+        self.is_clear = False
+    
+    def set_fire_timer(self):
+        fire_timer = threading.Timer(self.GAME_TIME_LIMIT, self.time_over, args=[])
+        fire_timer.start()
+        
     def play_single(self) :
         '''
         싱글모드.
         표적지를 한 개만 랜덤하게 세움.
         '''
+        game_time = 0
+        
         print("Log : Game Mode : Single")
         for repeat in range(self.game_repeat):
             print("Log : Game No :", repeat)
+            self.init_state()
+            
             # (target/light_sensor) = (0/0,1) (1/2,3) (2/4,5) (3/6,7)
             # light_sensor = target*2, target*2+1
             target = randrange(self.target_number)
             light_sensor_head = target*2
             light_sensor_body = target*2+1
             print("Target :", target)
+            
             self.controller.controllTarget(target, self.REQ_TARGET_UP)
-            while not (self.controller.getLightSensorState(light_sensor_head)
-                       or self.controller.getLightSensorState(light_sensor_body)):
-                continue
-            print("Log : Hit!!")
+            
+            self.set_fire_timer()
+            start_time = time.time()
+            while not self.is_time_over :
+                if (self.controller.getLightSensorState(light_sensor_head)
+                       or self.controller.getLightSensorState(light_sensor_body)) :
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+                    game_time += elapsed_time
+                    print("Log : Clear!")
+                    print("Log : Elapsed_time :", elapsed_time)
+                    self.is_clear = True
+                    break
+            
+            if not self.is_clear :
+                print("Log : No Clear!!")
+                
             self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
-
             time.sleep(self.game_interval)
 
     def play_team(self, game_participant):
@@ -96,9 +129,11 @@ class Game:
         표적지를 참여자 수 만큼 랜덤하게 세움
         :param game_participant: 참가자 수
         '''
+        game_time = 0
         print("Log : Game Mode : Team")
         for repeat in range(self.game_repeat):
             print("Log : Game No :", repeat)
+            self.init_state()
             # target = randrange(self.TARGET)
             # (target/light_sensor) = (0/0,1) (1/2,3) (2/4,5) (3/6,7)
             # light_sensor = target*2, target*2+1
@@ -109,15 +144,33 @@ class Game:
             light_sensor_bodys = [head+1 for head in light_sensor_heads]
             print("Targets :", targets)
             down_count = game_participant
+            
             for target in targets :
                 self.controller.controllTarget(target, self.REQ_TARGET_UP)
+            
+            self.set_fire_timer()
+            start_time = time.time()
+            while not self.is_time_over :
 
-            while down_count > 0 :
                 for i in range(game_participant) :
-                    if self.controller.getLightSensorState(0) or self.controller.getLightSensorState(1) :
+                    if (self.controller.getLightSensorState(light_sensor_heads[i])
+                    or self.controller.getLightSensorState(light_sensor_bodys[i])) :
                         self.controller.controllTarget(targets[i], self.REQ_TARGET_DOWN)
+                        print("Log : Hit!!")
                         down_count -= 1
-
+                        
+                if down_count == 0 :
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+                    game_time += elapsed_time
+                    print("Log : Clear!")
+                    print("Log : Elapsed_time :", elapsed_time)
+                    self.is_clear = True
+                    break
+                
+            if not self.is_clear :
+                print("Log : No Clear!!")
+                
             for target in targets:
                 self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
 
