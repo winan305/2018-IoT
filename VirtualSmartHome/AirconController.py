@@ -19,7 +19,8 @@ def controll(controll_msg) :
 
 def start_mqtt(host="localhost", port=1883, abc=60) :
     mqttc.on_connect = on_connect
+    mqttc.on_message = on_message
     mqttc.connect(host, port, abc)
-    mqttc.loop_start()
+    mqttc.loop_forever()
 
 start_mqtt()

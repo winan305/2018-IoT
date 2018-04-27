@@ -11,19 +11,19 @@ def on_connect(client, userdata, flags, rc):
 
 def generate_data():
     isPerson = randrange(2)
-    print("사람 감지됨" if isPerson is 1 else "사람 감지 안됨")
     return isPerson
 
 def publishing(data):
-    publish_timer = threading.Timer(PUBLISHING_TIME, publishing, args=generate_data())
+    publish_timer = threading.Timer(PUBLISHING_TIME, publishing, args=[generate_data()])
     mqttc.publish("home/person", data)
+    print("사람 감지됨" if data is 1 else "사람 감지 안됨")
     publish_timer.start()
 
 def start_mqtt(host="localhost", port=1883, abc=60) :
 
     mqttc.on_connect = on_connect
     mqttc.connect(host, port, abc)
-    mqttc.loop_start()
+    mqttc.loop_forever()
 
 start_mqtt()
 

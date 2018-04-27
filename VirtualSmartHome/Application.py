@@ -22,8 +22,9 @@ def on_message(client, userdata, msg) :
     global humidity
 
     topic = msg.topic
+
     if topic == sub_person :
-        isPerson = msg.payload.decode('ascii')
+        isPerson = int(msg.payload.decode('ascii'))
         controll_lamp(isPerson)
 
     else :
@@ -42,9 +43,9 @@ def controll_lamp(isPerson) :
 
 def controll_aircon(T, RH) :
     # T = 기온, RH = 상대습도
-    discomfort_index = (9/5)*T - 0.55*(1-RH)*((9/5)*T-26) + 32
+    discomfort_index = (9/5)*T - (0.55*(1-RH)*((9/5)*T-26)) + 32
     level = get_level(discomfort_index)
-    controll_dict = {"Very High" : "START", "High" : "START", "Low" : "STOP"}
+    controll_dict = {"Very High" : "START", "High" : "START", "Normal" :"None", "Low" : "STOP"}
 
     if isPerson is 0 :
         mqttc.publish("home/controll/aircon", "STOP")
@@ -52,7 +53,7 @@ def controll_aircon(T, RH) :
     else :
         mqttc.publish("home/controll/aircon", controll_dict[level])
 
-    print(round(discomfort_index,2), "(" + level + ")", "[temperature :", T, "humidity :", RH)
+    print(round(discomfort_index,2), "(" + level + ")", "[temperature :", T, "humidity :", RH, "%")
 
 def get_level(discomfort_index) :
     if discomfort_index >= 80 :
@@ -67,8 +68,9 @@ def get_level(discomfort_index) :
 
 def start_mqtt(host="localhost", port=1883, abc=60) :
     mqttc.on_connect = on_connect
+    mqttc.on_message = on_message
     mqttc.connect(host, port, abc)
-    mqttc.loop_start()
+    mqttc.loop_forever()
 
 start_mqtt()
 
