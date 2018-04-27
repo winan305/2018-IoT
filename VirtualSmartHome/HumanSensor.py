@@ -1,14 +1,29 @@
 import paho.mqtt.client as mqtt
-import time
+from random import *
+import threading
 
-def on_connect(client, userdata, flags, rc) :
-    print("Human Sensor Connected.")
-
-def generate_data() :
-    pass
-
-
+PUBLISHING_TIME = 2
 mqttc = mqtt.Client()
-mqttc.on_connect = on_connect
-mqttc.connect("localhost", 1883, 60)
-mqttc.loop_forever()
+
+def on_connect(client, userdata, flags, rc):
+    print("Human Sensor Connected.")
+    publishing(generate_data())
+
+def generate_data():
+    isPerson = randrange(2)
+    print("사람 감지됨" if isPerson is 1 else "사람 감지 안됨")
+    return isPerson
+
+def publishing(data):
+    publish_timer = threading.Timer(PUBLISHING_TIME, publishing, args=generate_data())
+    mqttc.publish("home/person", data)
+    publish_timer.start()
+
+def start_mqtt(host="localhost", port=1883, abc=60) :
+
+    mqttc.on_connect = on_connect
+    mqttc.connect(host, port, abc)
+    mqttc.loop_start()
+
+start_mqtt()
+
