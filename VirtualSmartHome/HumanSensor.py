@@ -26,6 +26,7 @@ def on_connect(client, userdata, flags, rc):
 def generate_data():
     # 0,1 데이터 생성, 사람이 있는지 없는지에 대한 값이다.
     isPerson = randrange(2)
+<<<<<<< HEAD
     # 1이면 사람이 감지, 아니라면 감지가 안됨을 출력한다.
     print("사람 감지됨" if isPerson is 1 else "사람 감지 안됨")
     # 감지 데이터 반환
@@ -40,6 +41,14 @@ def publish(data):
     mqttc.publish("home/person", data)
     # 타이머를 시작하면 2초뒤에 타이머가 실행된다.
     # 타이머가 publish 함수를 호출하므로 2초마다 무한 반복된다.
+=======
+    return isPerson
+
+def publishing(data):
+    publish_timer = threading.Timer(PUBLISHING_TIME, publishing, args=[generate_data()])
+    mqttc.publish("home/person", data)
+    print("사람 감지됨" if data is 1 else "사람 감지 안됨")
+>>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
     publish_timer.start()
 
 # 호스트, 포트, keepalive 를 전달받아 mqtt서버에 연결하고 루프를 시작하는 함수
@@ -47,12 +56,17 @@ def publish(data):
 def start_mqtt(host="localhost", port=1883, keepalive=60) :
     # 콜백함수를 등록한다.
     mqttc.on_connect = on_connect
+<<<<<<< HEAD
 
     # 호스트와 포트번호를 가진 mqtt 서버에 접속한다.
     mqttc.connect(host, port, keepalive)
 
     # 루프를 실행한다.
     mqttc.loop_start()
+=======
+    mqttc.connect(host, port, abc)
+    mqttc.loop_forever()
+>>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()

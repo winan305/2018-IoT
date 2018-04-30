@@ -43,12 +43,17 @@ def start_mqtt(host="localhost", port=1883, keepalive=60) :
     # 콜백함수를 등록한다.
     mqttc.on_connect = on_connect
     mqttc.on_message = on_message
+<<<<<<< HEAD
 
     # 호스트와 포트번호를 가진 mqtt 서버에 접속한다.
     mqttc.connect(host, port, keepalive)
 
     # 루프를 실행한다.
     mqttc.loop_start()
+=======
+    mqttc.connect(host, port, abc)
+    mqttc.loop_forever()
+>>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()
