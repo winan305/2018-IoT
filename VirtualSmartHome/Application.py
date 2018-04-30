@@ -123,7 +123,7 @@ def start_mqtt(host="localhost", port=1883,  keepalive=60) :
     mqttc.connect(host, port,  keepalive)
 
     # 루프를 실행한다.
-    mqttc.loop_start()
+    mqttc.loop_forever()
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()
