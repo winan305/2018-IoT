@@ -40,7 +40,6 @@ def on_message(client, userdata, msg) :
     # 토픽값을 얻어온다.
     topic = msg.topic
 
-<<<<<<< HEAD
     # 데이터를 얻어오고 아스키 형식으로 디코드한다.
     data = msg.payload.decode('ascii')
 
@@ -48,10 +47,6 @@ def on_message(client, userdata, msg) :
     if topic == sub_person :
         # 사람감지 여부 변수에 값을 저장하고 램프를 컨트롤한다.
         isPerson = data
-=======
-    if topic == sub_person :
-        isPerson = int(msg.payload.decode('ascii'))
->>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
         controll_lamp(isPerson)
 
     # 그 외의 토픽인 경우
@@ -83,7 +78,6 @@ def controll_lamp(isPerson) :
 # 기온과 상대습도를 전달받고 불쾌지수를 얻어 에어컨 제어 메시지를 publish 하는 함수
 def controll_aircon(T, RH) :
     # T = 기온, RH = 상대습도
-<<<<<<< HEAD
     # 상대습도 계산식에 따라 불쾌지수를 계산한다.
     discomfort_index = (9/5)*T - 0.55*(1-RH)*((9/5)*T-26) + 32
 
@@ -93,11 +87,6 @@ def controll_aircon(T, RH) :
     # 불쾌지수에 따라 에어컨 제어 메시지를 얻는 딕셔너리
     # {키 : 값} = {불쾌지수 : 제어메세지}
     controll_dict = {"Very High" : "START", "High" : "START", "Low" : "STOP"}
-=======
-    discomfort_index = (9/5)*T - (0.55*(1-RH)*((9/5)*T-26)) + 32
-    level = get_level(discomfort_index)
-    controll_dict = {"Very High" : "START", "High" : "START", "Normal" :"None", "Low" : "STOP"}
->>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
 
     # 사람이 없다면 불쾌지수와 관계없이 에어컨 STOP 메세지를 publish 한다.
     if isPerson is 0 :
@@ -107,12 +96,8 @@ def controll_aircon(T, RH) :
     else :
         mqttc.publish("home/controll/aircon", controll_dict[level])
 
-<<<<<<< HEAD
     # 불쾌지수 값, 단계, 온도, 습도(%)를 출력한다.
     print(round(discomfort_index,2), "(" + level + ")", "[temperature :", T, "humidity :", RH, "(%)")
-=======
-    print(round(discomfort_index,2), "(" + level + ")", "[temperature :", T, "humidity :", RH, "%")
->>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
 
 # 불쾌지수의 값에 따라 단계를 반환하는 함수
 def get_level(discomfort_index) :
@@ -133,17 +118,12 @@ def start_mqtt(host="localhost", port=1883,  keepalive=60) :
     # 콜백함수를 등록한다.
     mqttc.on_connect = on_connect
     mqttc.on_message = on_message
-<<<<<<< HEAD
 
     # 호스트와 포트번호를 가진 mqtt 서버에 접속한다.
     mqttc.connect(host, port,  keepalive)
 
     # 루프를 실행한다.
     mqttc.loop_start()
-=======
-    mqttc.connect(host, port, abc)
-    mqttc.loop_forever()
->>>>>>> 26fc737b28bc2f81248db46aed217ddaf9263bcb
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()
