@@ -16,6 +16,7 @@ sub_person = "home/person"
 isPerson = 0
 temperature = 0
 humidity = 0
+is_set_temp, is_set_humi = False, False
 
 # mqtt 클라이언트 객체 생성
 mqttc = mqtt.Client()
@@ -36,12 +37,13 @@ def on_message(client, userdata, msg) :
     global isPerson
     global temperature
     global humidity
-
+    global is_set_temp
+    global is_set_humi
     # 토픽값을 얻어온다.
     topic = msg.topic
 
     # 데이터를 얻어오고 아스키 형식으로 디코드한다.
-    data = msg.payload.decode('ascii')
+    data = float(msg.payload.decode('ascii'))
 
     # 토픽이 사람감지에 대한 토픽인 경우
     if topic == sub_person :
@@ -55,14 +57,17 @@ def on_message(client, userdata, msg) :
         if topic == sub_temp :
             # 온도 변수에 데이터를 저장한다.
             temperature = data
-
+            is_set_temp = True
         # 습도에 대한 토픽인 경우
         elif topic == sub_humi :
             # 습도 변수에 데이터를 저장한다.
             humidity = data
+            is_set_humi = True
 
         # 저장된 온도와 습도로 에어컨을 컨트롤한다.
-        controll_aircon(temperature, humidity)
+        if is_set_temp and is_set_humi :
+            controll_aircon(temperature, humidity)
+            is_set_temp, is_set_humi = False, False
 
 # 사람감지 여부를 전달받아 램프를 컨트롤하는 메세지를 publish 하는 함수
 def controll_lamp(isPerson) :
@@ -79,14 +84,14 @@ def controll_lamp(isPerson) :
 def controll_aircon(T, RH) :
     # T = 기온, RH = 상대습도
     # 상대습도 계산식에 따라 불쾌지수를 계산한다.
-    discomfort_index = (9/5)*T - 0.55*(1-RH)*((9/5)*T-26) + 32
+    discomfort_index = (9.0/5.0)*T - 0.55*(1.0-RH)*((9.0/5.0)*T-26.0) + 32.0
 
     # 불쾌지수 레벨을 얻어온다.
     level = get_level(discomfort_index)
 
     # 불쾌지수에 따라 에어컨 제어 메시지를 얻는 딕셔너리
     # {키 : 값} = {불쾌지수 : 제어메세지}
-    controll_dict = {"Very High" : "START", "High" : "START", "Low" : "STOP"}
+    controll_dict = {"Very High" : "START", "High" : "START", "Normal" : "", "Low" : "STOP"}
 
     # 사람이 없다면 불쾌지수와 관계없이 에어컨 STOP 메세지를 publish 한다.
     if isPerson is 0 :
@@ -97,7 +102,7 @@ def controll_aircon(T, RH) :
         mqttc.publish("home/controll/aircon", controll_dict[level])
 
     # 불쾌지수 값, 단계, 온도, 습도(%)를 출력한다.
-    print(round(discomfort_index,2), "(" + level + ")", "[temperature :", T, "humidity :", RH, "(%)")
+    print(round(discomfort_index,2), "(" + str(level) + ")", "[temperature :", T, "humidity :", RH, "(%)")
 
 # 불쾌지수의 값에 따라 단계를 반환하는 함수
 def get_level(discomfort_index) :
