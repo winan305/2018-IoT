@@ -42,7 +42,7 @@ def on_message(client, userdata, msg) :
     # 토픽값을 얻어온다.
     topic = msg.topic
 
-    # 데이터를 얻어오고 아스키 형식으로 디코드한다.
+    # 데이터를 얻어오고 아스키 형식으로 디코드하고 실수형으로 바꿔준다.
     data = float(msg.payload.decode('ascii'))
 
     # 토픽이 사람감지에 대한 토픽인 경우
@@ -132,4 +132,5 @@ def start_mqtt(host="localhost", port=1883,  keepalive=60) :
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()
+
 

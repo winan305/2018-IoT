@@ -9,7 +9,6 @@ import paho.mqtt.client as mqtt
 from random import *
 import threading
 
-
 # 메시지를 publish 하는 시간 간격(초)
 PUBLISHING_TIME = 2
 
@@ -65,3 +64,5 @@ def start_mqtt(host="localhost", port=1883, keepalive=60) :
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()
+
+
