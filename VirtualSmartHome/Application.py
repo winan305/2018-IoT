@@ -48,7 +48,7 @@ def on_message(client, userdata, msg) :
     # 토픽이 사람감지에 대한 토픽인 경우
     if topic == sub_person :
         # 사람감지 여부 변수에 값을 저장하고 램프를 컨트롤한다.
-        isPerson = data
+        isPerson = int(data)
         controll_lamp(isPerson)
 
     # 그 외의 토픽인 경우
@@ -71,7 +71,6 @@ def on_message(client, userdata, msg) :
 
 # 사람감지 여부를 전달받아 램프를 컨트롤하는 메세지를 publish 하는 함수
 def controll_lamp(isPerson) :
-
     # 사람이 감지되면 램프 ON 제어 메세지를 publish 한다.
     if isPerson is 1 :
         mqttc.publish("home/controll/lamp", "ON")
