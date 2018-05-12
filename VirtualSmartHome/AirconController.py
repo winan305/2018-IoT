@@ -52,3 +52,4 @@ def start_mqtt(host="localhost", port=1883, keepalive=60) :
 
 # mqtt 클라이언트를 시작하는 함수를 호출한다.
 start_mqtt()
+
