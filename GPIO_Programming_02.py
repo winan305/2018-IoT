@@ -19,7 +19,7 @@ spi.max_speed_hz = 61000
 light_channel = 0
 
 # 초록, 노랑, 빨강 LED GPIO 핀 번호
-led_pin = [16, 20, 24]
+led_pin = [16, 20, 21]
 # LED 상태 플래그
 LED_FLAG_GREEN, LED_FLAG_YELLOW, LED_FLAG_RED, LED_FLAG_ALL = 0, 1, 2, 3
 # 조도센서의 값이 150보다 작아지면 모든 LED를 켠다.
@@ -88,6 +88,9 @@ def getLEDFlag(distance, light_level) :
     if light_level < LIGHT_LIMIT :
         led_flag = LED_FLAG_ALL
         print("All LED On!!")
+    if light_level > 550 :
+        print("Laser!!")
+        led_flag = LED_FLAG_GREEN
 
     # 물체와의 거리가 30cm 이상이면 녹색 LED를 켜는 플래그로 설정한다.
     elif distance >= 30 :
@@ -150,7 +153,7 @@ def main() :
             turnOnOffLED(led_flag)
 
             # 1ms 쉰다.
-            time.sleep(1)
+            time.sleep(0.1)
 
     # 키보드 인터럽트 예외 발생 시 예외처리한다.
     # spi를 닫고 gpio를 클린하고 프로그램을 종료하게 된다.

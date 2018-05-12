@@ -99,17 +99,18 @@ class Controller :
         # 모든 표적지를 눕힘
         for pmw in self.pmws :
             pmw.ChangeDutyCycle(self.TARGET_DOWN_ANGLE)
-
+            
         print("Log : Call initSensorState(), result =", self.AVG_LIGHT_VALUE)
         time.sleep(3)
         
     def start(self) :
         for motorPin in self.motorPins :
             GPIO.setup(motorPin, GPIO.OUT)
-            p = GPIO.PWM(motorPin, 50)
-            p.start(0)
-            self.pmws.append(p)
+            pmw = GPIO.PWM(motorPin, 50)
+            pmw.start(self.TARGET_DOWN_ANGLE)
+            self.pmws.append(pmw)
 
     def stop(self) :
         for pmw in self.pmws :
             pmw.stop()
+        GPIO.cleanup()

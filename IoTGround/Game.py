@@ -23,7 +23,7 @@ class Game:
     GAME_MODE_TEAM = "team"
     GAME_TIME_LIMIT = 3 # 3sec
     
-    def __init__(self, game_mode, game_participant, game_repeat = 10, game_interval = 3):
+    def __init__(self, game_mode, game_participant, game_repeat = 3, game_interval = 3):
         '''
         파이에 전원 꽂으면 Main 객체가 생성되도록 하고
         컨트롤러 객체 생성해서 컨트롤러 핀 모드 초기화
@@ -56,10 +56,7 @@ class Game:
 
     def play(self, game_mode):
         '''
-        게임 진행 하는 함수지 뭐.
-        게임모드, 인원수 맞춰서 표적을 세워야 함
-        아마 멀티 쓰레딩이 필요할 듯 싶은데. 흠..
-        고민좀 해봐야할듯
+        게임 진행 하는 함수
         '''
         print("Log : Call play()")
 
