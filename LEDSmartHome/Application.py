@@ -20,8 +20,8 @@ humidity = -1
 LED_GREEN, LED_YELLOW, LED_RED, LED_ALL = 0,1,2,3
 LED_FLAGS = ["GREEN LED ON", "YELLOW LED ON", "RED LED ON", "ALL LED ON"]
 
-LIMIT_HUMI = 123
-LIMIT_TEMP = 9876543210
+LIMIT_HUMI = 50
+LIMIT_TEMP = 30
 
 # mqtt 클라이언트 객체 생성
 mqttc = mqtt.Client()
