@@ -2,6 +2,9 @@ import Controller as Controller
 from random import *
 import time
 import threading
+import DBManager
+
+from datetime import datetime
 '''
 IoT Team Project Source Code - Last update : YYYY-MM-DD (comment if need)
 '''
@@ -21,9 +24,10 @@ class Game:
     REQ_TARGET_UP, REQ_TARGET_DOWN = 0, 1
     GAME_MODE_SINGLE = "single"
     GAME_MODE_TEAM = "team"
+    GAME_MODE_DEMO = "demo"
     GAME_TIME_LIMIT = 3 # 3sec
     
-    def __init__(self, game_mode, game_participant, game_repeat = 3, game_interval = 3):
+    def __init__(self, game_mode, game_participants_num, game_participants_name, game_repeat = 10, game_interval = 3):
         '''
         파이에 전원 꽂으면 Main 객체가 생성되도록 하고
         컨트롤러 객체 생성해서 컨트롤러 핀 모드 초기화
@@ -35,12 +39,15 @@ class Game:
 
         # 게임 모드, 참가자, 라운드 횟수, 라운드간 쉬는 시간
         self.game_mode = game_mode.lower()
-        self.game_participant = game_participant
+        self.game_participants_num = game_participants_num
+        self.game_participants_name = game_participants_name
         self.game_repeat = game_repeat
         self.game_interval = game_interval
         
         self.is_clear = False
         self.is_time_over = False
+
+        self.manager = DBManager.DBManager()
         
     def ready(self):
         '''
@@ -64,9 +71,12 @@ class Game:
             self.play_single()
 
         elif game_mode == self.GAME_MODE_TEAM :
-            self.play_team(self.game_participant)
+            self.play_team(self.game_participants_num)
 
-        print("Game Finish!!")
+        elif game_mode == self.GAME_MODE_DEMO :
+            self.play_demo()
+
+        print("Log : Game Finish!!")
     
     def time_over(self) :
         if not self.is_clear :
@@ -84,9 +94,15 @@ class Game:
         '''
         싱글모드.
         표적지를 한 개만 랜덤하게 세움.
+        phone_number, play_date, accuracy, max_time, min_time, avg_time
         '''
         game_time = 0
-        
+        success_count = 0
+        phone_number = self.game_participants_name
+        play_date = datetime.now().strftime('%Y%m%d')
+        max_time = 0
+        min_time = 9876543210
+
         print("Log : Game Mode : Single")
         for repeat in range(self.game_repeat):
             print("Log : Game No :", repeat)
@@ -112,6 +128,9 @@ class Game:
                     print("Log : Clear!")
                     print("Log : Elapsed_time :", elapsed_time)
                     self.is_clear = True
+                    max_time = max(max_time, elapsed_time)
+                    min_time = min(min_time, elapsed_time)
+                    success_count += 1
                     break
             
             if not self.is_clear :
@@ -119,14 +138,25 @@ class Game:
                 
             self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
             time.sleep(self.game_interval)
+        accuracy = success_count / self.game_repeat
+        avg_time = game_time / self.game_repeat
+        game_result = [phone_number, play_date, accuracy, max_time, min_time, avg_time]
+        self.save(game_result, DBManager.GAME_MODE_SOLO)
+        print("Log : Single mode finish")
 
-    def play_team(self, game_participant):
+    def play_team(self, game_participants_num):
         '''
         팀모드.
         표적지를 참여자 수 만큼 랜덤하게 세움
         :param game_participant: 참가자 수
         '''
         game_time = 0
+        success_count = 0
+        team_name = self.game_participants_name
+        play_date = datetime.now().strftime('%Y%m%d')
+        max_time = 0
+        min_time = 9876543210
+
         print("Log : Game Mode : Team")
         for repeat in range(self.game_repeat):
             print("Log : Game No :", repeat)
@@ -136,11 +166,11 @@ class Game:
             # light_sensor = target*2, target*2+1
 
             # 0,1,2,3 중에 게임 참가자만큼의 개수를 랜덤한 리스트로 반환함. (3명이면 0,2,3 이런식)
-            targets = sample(range(self.target_number), game_participant)
+            targets = sample(range(self.target_number), game_participants_num)
             light_sensor_heads = [target*2 for target in targets]
             light_sensor_bodys = [head+1 for head in light_sensor_heads]
             print("Targets :", targets)
-            down_count = game_participant
+            down_count = game_participants_num
             
             for target in targets :
                 self.controller.controllTarget(target, self.REQ_TARGET_UP)
@@ -149,7 +179,7 @@ class Game:
             start_time = time.time()
             while not self.is_time_over :
 
-                for i in range(game_participant) :
+                for i in range(game_participants_num) :
                     if (self.controller.getLightSensorState(light_sensor_heads[i])
                     or self.controller.getLightSensorState(light_sensor_bodys[i])) :
                         self.controller.controllTarget(targets[i], self.REQ_TARGET_DOWN)
@@ -160,6 +190,9 @@ class Game:
                     end_time = time.time()
                     elapsed_time = end_time - start_time
                     game_time += elapsed_time
+                    max_time = max(max_time, elapsed_time)
+                    min_time = min(min_time, elapsed_time)
+                    success_count += 1
                     print("Log : Clear!")
                     print("Log : Elapsed_time :", elapsed_time)
                     self.is_clear = True
@@ -172,21 +205,75 @@ class Game:
                 self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
 
             time.sleep(self.game_interval)
+        accuracy = success_count / self.game_repeat
+        avg_time = game_time / self.game_repeat
+        game_result = [team_name, play_date, accuracy, max_time, min_time, avg_time]
+        self.save(game_result, DBManager.GAME_MODE_TEAM)
+        print("Log : Team mode finish")
 
-    def save(self):
+    def play_demo(self):
+        '''
+        데모모드.
+        표적지를 한 개만 세움.
+        phone_number, play_date, accuracy, max_time, min_time, avg_time
+        '''
+        game_time = 0
+        success_count = 0
+        phone_number = "01082222910"
+        play_date = datetime.now().strftime('%Y%m%d')
+        max_time = 0
+        min_time = 9876543210
+
+        print("Log : Game Mode : Demo")
+        for repeat in range(self.game_repeat):
+            print("Log : Game No :", repeat)
+            self.init_state()
+
+            # (target/light_sensor) = (0/0,1) (1/2,3) (2/4,5) (3/6,7)
+            # light_sensor = target*2, target*2+1
+            target = 0
+            light_sensor_head = 0
+            light_sensor_body = 1
+            print("Target :", target)
+
+            self.controller.controllTarget(target, self.REQ_TARGET_UP)
+
+            self.set_fire_timer()
+            start_time = time.time()
+            while not self.is_time_over:
+                if (self.controller.getLightSensorState(light_sensor_head)
+                    or self.controller.getLightSensorState(light_sensor_body)):
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+                    game_time += elapsed_time
+                    print("Log : Clear!")
+                    print("Log : Elapsed_time :", elapsed_time)
+                    self.is_clear = True
+                    max_time = max(max_time, elapsed_time)
+                    min_time = min(min_time, elapsed_time)
+                    success_count += 1
+                    break
+
+            if not self.is_clear:
+                print("Log : No Clear!!")
+
+            self.controller.controllTarget(target, self.REQ_TARGET_DOWN)
+            time.sleep(self.game_interval)
+
+        accuracy = success_count / self.game_repeat
+        avg_time = game_time / self.game_repeat
+        game_result = [phone_number, play_date, accuracy, max_time, min_time, avg_time]
+        print("Game Result : ", game_result)
+        #self.save(game_result, DBManager.GAME_MODE_SOLO)
+        print("Log : Demo mode finish")
+
+    def save(self, game_result, game_mode):
         '''
         게임 끝나면 결과가 저장되어 있겠지?
         그 값들 데이터베이스에 저장하자.
         '''
-        print("Log : Call save()")
-
-    def reset(self):
-        '''
-        게임 진행하면서 저장된 값들이 있을 것임.
-        그 값들을 초기화 해서 다음 게임에 지장없게.
-        '''
-        print("Log : Call reset()")
-        self.controller.stop()
+        self.manager.insert_game_result(game_result, game_mode)
+        print("Log : Call save(), result :", game_result)
 
     def run(self):
         '''
@@ -195,14 +282,9 @@ class Game:
         print("Log : Call run()")
         self.ready()
         self.play(self.game_mode)
-        self.save()
-        self.reset()
-    
-    def clear(self) :
-        '''
-        target clear function
-        '''
-        pass
 
-#game = Game(game_mode="team", game_participant=2, game_repeat=10)
+#game = Game(game_mode="team", game_participants_num=2, game_participants_name="team", game_repeat=10)
+#game = Game(game_mode="solo", game_participants_num=1, game_participants_name="01082222910", game_repeat=10)
+#game = Game(game_mode="demo", game_participants_num=1, game_participants_name="demo", game_repeat=10)
 #game.run()
+
