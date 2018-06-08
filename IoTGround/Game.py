@@ -2,7 +2,7 @@ import Controller as Controller
 from random import *
 import time
 import threading
-import DBManager
+#import DBManager
 
 from datetime import datetime
 '''
@@ -25,7 +25,7 @@ class Game:
     GAME_MODE_SINGLE = "single"
     GAME_MODE_TEAM = "team"
     GAME_MODE_DEMO = "demo"
-    GAME_TIME_LIMIT = 3 # 3sec
+    GAME_TIME_LIMIT = 100 # 3sec
     
     def __init__(self, game_mode, game_participants_num, game_participants_name, game_repeat = 10, game_interval = 3):
         '''
@@ -47,7 +47,7 @@ class Game:
         self.is_clear = False
         self.is_time_over = False
 
-        self.manager = DBManager.DBManager()
+        #self.manager = DBManager.DBManager()
         
     def ready(self):
         '''
@@ -237,7 +237,7 @@ class Game:
             print("Target :", target)
 
             self.controller.controllTarget(target, self.REQ_TARGET_UP)
-
+            time.sleep(0.7)
             self.set_fire_timer()
             start_time = time.time()
             while not self.is_time_over:
@@ -285,6 +285,6 @@ class Game:
 
 #game = Game(game_mode="team", game_participants_num=2, game_participants_name="team", game_repeat=10)
 #game = Game(game_mode="solo", game_participants_num=1, game_participants_name="01082222910", game_repeat=10)
-#game = Game(game_mode="demo", game_participants_num=1, game_participants_name="demo", game_repeat=10)
-#game.run()
+game = Game(game_mode="demo", game_participants_num=1, game_participants_name="demo", game_repeat=10)
+game.run()
 

@@ -12,14 +12,14 @@ class Controller :
     TARGET_NUMBER = 4
     FLAG_TARGET_UP, FLAG_TARGET_DOWN = 0 , 1
     TARGET_STATE = [False] * TARGET_NUMBER
-    TARGET_UP_ANGLE, TARGET_DOWN_ANGLE = 7.5, 12
+    TARGET_UP_ANGLE, TARGET_DOWN_ANGLE = 12, 7.5
     # GPIO 5, 6, 13, 19 사용
     motorPins = [18, 5,6,13]
     pmws = []
 
     LIGHT_SENSOR_NUMBER = 8
     light_channels = [i for i in range(LIGHT_SENSOR_NUMBER)]
-    AVG_LIGHT_VALUE = [0] * LIGHT_SENSOR_NUMBER
+    AVG_LIGHT_VALUE = [9876543210] * LIGHT_SENSOR_NUMBER
 
     def __init__(self):
         '''
@@ -67,7 +67,7 @@ class Controller :
 
     def getLightSensorState(self, channel) :
         light_value = self.getLigthValue(channel)
-        return light_value > self.AVG_LIGHT_VALUE[channel] + 100
+        return light_value > self.AVG_LIGHT_VALUE[channel] + 50
 
     def initSensorState(self) :
         '''
@@ -90,12 +90,15 @@ class Controller :
 
         for _ in range(self.INIT_REPEAT) :
             for light_channel in self.light_channels :
-                self.AVG_LIGHT_VALUE[light_channel] += self.getLigthValue(light_channel)
+                #time.sleep(0.05)
+                now_val = self.getLigthValue(light_channel)
+                self.AVG_LIGHT_VALUE[light_channel] = min(self.AVG_LIGHT_VALUE[light_channel], now_val)
+                print(now_val)
             time.sleep(0.5)
 
-        for i in self.light_channels :
-            self.AVG_LIGHT_VALUE[i] = int(self.AVG_LIGHT_VALUE[i] / 5)
-
+        #for i in self.light_channels :
+            #self.AVG_LIGHT_VALUE[i] = int(self.AVG_LIGHT_VALUE[i] / 5)
+            
         # 모든 표적지를 눕힘
         for pmw in self.pmws :
             pmw.ChangeDutyCycle(self.TARGET_DOWN_ANGLE)
