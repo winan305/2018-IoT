@@ -1,8 +1,8 @@
 import paho.mqtt.client as mqtt
 import Server
 
-REQ_MESSAGE = ["req/game_play", "req/get_info", "req/get_rank"]
-RES_MESSAGE = ["res/game_play", "res/get_info", "res/get_rank"]
+REQ_MESSAGE = ["+/REQ_GAME_START, +/REQ_SHOW_RANKING, +/REQ_SHOW_USERINFO"]
+RES_MESSAGE = ["+/RES_GAME_START, +/RES_SHOW_RANKING, +/RES_SHOW_USEINFO, +/RES_SHOW_GAME_RESULT"]
 
 server = Server.Server()
 
@@ -29,7 +29,8 @@ def on_connect(client, userdata, flags, rc) :
 
 def process(req, data):
     global server
-    print("MQTT Client REQ :", req, ", Data :", data)
+    request = req.split("/")
+    print(request)
     if req == REQ_MESSAGE[0] :
         server.start_game(data)
         
