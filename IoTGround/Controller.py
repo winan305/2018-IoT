@@ -12,9 +12,9 @@ class Controller :
     TARGET_NUMBER = 4
     FLAG_TARGET_UP, FLAG_TARGET_DOWN = 0 , 1
     TARGET_STATE = [False] * TARGET_NUMBER
-    TARGET_UP_ANGLE, TARGET_DOWN_ANGLE = 12, 7.5
+    TARGET_UP_ANGLE, TARGET_DOWN_ANGLE = 12.5, 7.5
     # GPIO 5, 6, 13, 19 사용
-    motorPins = [18, 5,6,13]
+    motorPins = [5,6,13,19]
     pmws = []
 
     LIGHT_SENSOR_NUMBER = 8
@@ -26,7 +26,7 @@ class Controller :
         생성자 함수.
         여기서 핀모드를 설정하든 뭘 하든 하면 되겠지?
         '''
-        print("Log : Controller Class Object init")
+        print("<Controller> : Controller Class Object init")
         # 여기서부터 모터
 
         GPIO.setmode(GPIO.BCM)
@@ -67,7 +67,7 @@ class Controller :
 
     def getLightSensorState(self, channel) :
         light_value = self.getLigthValue(channel)
-        return light_value > self.AVG_LIGHT_VALUE[channel] + 50
+        return light_value > self.AVG_LIGHT_VALUE[channel] + 70
 
     def initSensorState(self) :
         '''
@@ -87,23 +87,20 @@ class Controller :
         # 모든 표적지를 세움
         for pmw in self.pmws :
             pmw.ChangeDutyCycle(self.TARGET_UP_ANGLE)
+            
+        time.sleep(2)
 
         for _ in range(self.INIT_REPEAT) :
             for light_channel in self.light_channels :
-                #time.sleep(0.05)
                 now_val = self.getLigthValue(light_channel)
                 self.AVG_LIGHT_VALUE[light_channel] = min(self.AVG_LIGHT_VALUE[light_channel], now_val)
-                print(now_val)
             time.sleep(0.5)
-
-        #for i in self.light_channels :
-            #self.AVG_LIGHT_VALUE[i] = int(self.AVG_LIGHT_VALUE[i] / 5)
             
         # 모든 표적지를 눕힘
         for pmw in self.pmws :
             pmw.ChangeDutyCycle(self.TARGET_DOWN_ANGLE)
             
-        print("Log : Call initSensorState(), result =", self.AVG_LIGHT_VALUE)
+        print("<Controller> : Call initSensorState(), result =", self.AVG_LIGHT_VALUE)
         time.sleep(3)
         
     def start(self) :
@@ -114,6 +111,6 @@ class Controller :
             self.pmws.append(pmw)
 
     def stop(self) :
-        for pmw in self.pmws :
-            pmw.stop()
+        #for pmw in self.pmws :
+            #pmw.stop()
         GPIO.cleanup()

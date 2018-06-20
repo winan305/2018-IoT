@@ -1,3 +1,4 @@
+#!
 import sqlite3
 
 GAME_MODE_TEAM = 2
@@ -10,7 +11,7 @@ class DBManager :
         self.conn_team = sqlite3.connect("IoTGround_team.db")
         self.cur_solo = self.conn_solo.cursor()
         self.cur_team = self.conn_team.cursor()
-        self.drop_tables()
+        #self.drop_tables()
         self.create_tables()
 
     def drop_tables(self):
@@ -56,7 +57,23 @@ class DBManager :
             self.cur_team.execute(sql, game_result)
             self.conn_team.commit()
 
+    def select_results_all(self) :
+        cursor = self.cur_solo
+        sql = "select * from solo"
 
+        if sql is not None:
+            cursor.execute(sql)
+            
+        print("All result :")
+
+        rows = cursor.fetchall()
+        datas = []
+        for row in rows :
+            data = "/".join(list(map(str, row)))
+            datas.append(data)
+        for data in datas :
+            print(data)
+            
     def select_results(self, name, game_mode) :
         cursor = None
         sql = None
@@ -79,7 +96,7 @@ class DBManager :
         for data in datas :
             print(data)
 
-    def get_ranking_list(self) :
+    def get_ranking_list(self, game_mode) :
         '''
         phone_number, play_date, accuracy, max_time, min_time, avg_time
         기준 : 명중률 > 평균반응속도 > 최소반응속도 > 최대반응속도 > 날짜
@@ -87,26 +104,38 @@ class DBManager :
         where phone_number = (select phone_number from solo)
         :return:
         '''
-        sql = "select * from solo " \
-              "order by accuracy desc," \
-              "avg_time asc," \
-              "min_time asc," \
-              "max_time asc," \
-              "play_date desc"
-        cursor = self.cur_solo
+        if game_mode is GAME_MODE_SOLO :
+            sql = "select * from solo " \
+                  "order by accuracy desc," \
+                  "avg_time asc," \
+                  "min_time asc," \
+                  "max_time asc," \
+                  "play_date desc"
+            cursor = self.cur_solo
+            
+        elif game_mode is GAME_MODE_TEAM :
+            sql = "select * from team " \
+                  "order by accuracy desc," \
+                  "avg_time asc," \
+                  "min_time asc," \
+                  "max_time asc," \
+                  "play_date desc"
+            cursor = self.cur_team
+
         cursor.execute(sql)
         rows = cursor.fetchall()
         rankings_dict = {}
         rankings = []
         for row in rows :
             if not row[1] in rankings_dict :
-                data = "/".join(list(map(str, row)))
+                data = "-".join(list(map(str, row)))
                 rankings_dict[row[1]] = data
                 rankings.append(data)
-
+                
+        print("-".join(rankings))
         return "-".join(rankings)
 
-manager = DBManager()
+'''manager = DBManager()
 manager.insert_game_result(["01082222910", "20180531", 0.78, 3.51, 2.78, 1.77], GAME_MODE_SOLO)
 manager.insert_game_result(["01082222910", "20180531", 0.88, 3.31, 2.11, 1.54], GAME_MODE_SOLO)
 manager.insert_game_result(["01082222910", "20180531", 0.91, 2.51, 1.38, 1.21], GAME_MODE_SOLO)
@@ -115,9 +144,10 @@ manager.insert_game_result(["01012345678", "20180531", 0.74, 3.11, 2.13, 1.97], 
 manager.insert_game_result(["01012345678", "20180531", 0.77, 1.78, 1.08, 0.98], GAME_MODE_SOLO)
 manager.insert_game_result(["01011112222", "20180531", 0.31, 4.15, 3.95, 2.36], GAME_MODE_SOLO)
 manager.insert_game_result(["01011112222", "20180531", 0.66, 3.31, 2.97, 2.11], GAME_MODE_SOLO)
-manager.insert_game_result(["01011112222", "20180531", 0.97, 2.11, 1.87, 1.54], GAME_MODE_SOLO)
+manager.insert_game_result(["01011112222", "20180531", 0.97, 2.11, 1.87, 1.54], GAME_MODE_SOLO)'''
 
-print(manager.get_ranking_list())
+
+#print(manager.get_ranking_list())
 #manager.insert_game_result(["ABC", "20180531", 1.23, 2.63, 1.17, 1.81], GAME_MODE_TEAM)
 '''manager.select_results("01082222910", GAME_MODE_SOLO)
 manager.select_results("01012345678", GAME_MODE_SOLO)
